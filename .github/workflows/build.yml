@@ -42,38 +42,10 @@ jobs:
 
     - name: Prepare dependencies
       run: |
-        sudo apt update
-        sudo apt upgrade
-        sudo apt install aptitude
-        sudo apt install python3 
-        sudo apt install build-essential
-        sudo apt install openssl
-        sudo alt install pip
-
-        sudo swapoff -a
-
-        sudo dd if=/dev/zero of=/swapfile bs=1G count=8
-        sudo mkswap /swapfile
-        sudo swapon /swapfile
-
-        free -m
-
-        pip install virtualenv
-
-        export PATH=$PATH:/home/benok10/.local/bin
-
-        apt install python3-virtualenv
-
-        sudo apt install python2.7
-        sudo apt install openssl
-        sudo aptitude install libssl-dev
-
-        sudo apt-get install libtinfo5
-
-        mkdir -p ~/.bin
-        PATH="${HOME}/.bin:${PATH}"
-        curl https://storage.googleapis.com/git-repo-downloads/repo > ~/.bin/repo
-        chmod a+rx ~/.bin/repo
+        sudo apt update -y
+        sudo apt install bc cpio flex bison aptitude git python-is-python3 tar perl wget curl lz4 -y
+        sudo aptitude install libssl-dev -y
+        sudo apt install python3
        
     - name: Fetch toolchains
       run: |
