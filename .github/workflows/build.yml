@@ -42,12 +42,6 @@ jobs:
 
     - name: Prepare dependencies
       run: |
-        sudo apt update -y
-        sudo apt install bc cpio flex bison aptitude git python-is-python3 tar perl wget curl lz4 -y
-        sudo aptitude install libssl-dev -y
-
-     - name: something
-       run: | 
         sudo apt update
         sudo apt upgrade
         sudo apt-get install git-all aptitude make gcc
