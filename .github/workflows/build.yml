@@ -62,7 +62,7 @@ jobs:
           mv clang* clang
         fi
         curl -LSs "https://raw.githubusercontent.com/rsuntk/toolchains/refs/heads/README/clone.sh" | bash -s androidcc-4.9
-      working-directory: kernel_root
+      working-directory: kernel-6.6
       
     - name: Build kernel
       id: buildKernel
@@ -112,7 +112,7 @@ jobs:
         gitsha1=$(git rev-parse --short HEAD)
         buildDetails="`make kernelversion`-`echo $DEVICE`_`echo $gitsha1`-`date +'%Y%m%d%H%M%S'`" && echo "buildDetails=$buildDetails" >> $GITHUB_OUTPUT
         mv out/.config out/build_config.txt
-      working-directory: kernel_root
+      working-directory: kernel-6.6
       
     - name: Upload config
       uses: actions/upload-artifact@v4
@@ -148,7 +148,7 @@ jobs:
           git clone https://github.com/rsuntk/rsuntkBotScript.git --depth=1 i && cp ./i/* . && rm -rf i
           bash $(pwd)/rsuntkbot.sh $ZIP "`cat buildDetails.txt`"
         fi
-      working-directory: kernel_root
+      working-directory: kernel-6.6
         
     - name: Strip LKMs
       continue-on-error: true
