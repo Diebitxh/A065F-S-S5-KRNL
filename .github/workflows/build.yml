@@ -43,9 +43,9 @@ jobs:
     - name: Prepare dependencies
       run: |
         sudo apt update -y
-        sudo apt install bc cpio flex bison aptitude git tar perl wget curl lz4 -y
+        sudo apt install bc cpio flex bison aptitude python-is-python3 git tar perl wget curl lz4 -y
         sudo aptitude install libssl-dev -y
-        sudo apt install python2
+        sudo apt install python3
        
     - name: Fetch toolchains
       run: |
