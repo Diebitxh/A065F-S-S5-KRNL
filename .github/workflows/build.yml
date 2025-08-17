@@ -44,7 +44,7 @@ jobs:
       run: |
         sudo apt update
         sudo apt upgrade
-        sudo apt-get install git-all aptitude make gcc
+        aptitude make gcc
         sudo apt install python-is-python3 build-essential openssl pip
 
         sudo swapoff -a
