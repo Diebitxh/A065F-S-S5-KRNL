@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       BRANCH:
-        description: Kernel branch
+        description: main
         default: 'A06'
         required: true
       BUILD_TARGET:
@@ -36,7 +36,7 @@ jobs:
       with:
         path: kernel_root
         repository: diebitxh/A065F-S-S5-KRNL
-        ref: ${{ github.event.inputs.BRANCH }}
+        ref: main
         show-progress: false
         fetch-depth: 1
 
