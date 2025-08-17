@@ -4,7 +4,7 @@ on:
     inputs:
       BRANCH:
         description: Kernel branch
-        default: 'Mayonaka-Rebased'
+        default: 'A06'
         required: true
       BUILD_TARGET:
         description: 'Build target'
@@ -35,7 +35,7 @@ jobs:
     - uses: actions/checkout@v4
       with:
         path: kernel_root
-        repository: rsuntk/android_kernel_samsung_mt6762-4.19
+        repository: diebitxh/A065F-S-S5-KRNL
         ref: ${{ github.event.inputs.BRANCH }}
         show-progress: false
         fetch-depth: 1
