@@ -46,7 +46,7 @@ jobs:
         sudo apt install bc cpio flex bison aptitude git python-is-python3 tar perl wget curl lz4 -y
         sudo aptitude install libssl-dev -y
 
-     - name: Python
+     - name: something
        run: | 
         sudo apt update
         sudo apt upgrade
@@ -59,26 +59,25 @@ jobs:
         sudo mkswap /swapfile
         sudo swapon /swapfile
 
-       free -m
+        free -m
 
         pip install virtualenv
 
-       export PATH=$PATH:/home/benok10/.local/bin
+        export PATH=$PATH:/home/benok10/.local/bin
 
-       apt install python3-virtualenv
+        apt install python3-virtualenv
 
-       sudo apt install python2.7
-       sudo apt install openssl
-       sudo aptitude install libssl-dev
+        sudo apt install python2.7
+        sudo apt install openssl
+        sudo aptitude install libssl-dev
 
-       sudo apt-get install libtinfo5
+        sudo apt-get install libtinfo5
 
-       mkdir -p ~/.bin
-       PATH="${HOME}/.bin:${PATH}"
-       curl https://storage.googleapis.com/git-repo-downloads/repo > ~/.bin/repo
-       chmod a+rx ~/.bin/repo
-
-        
+        mkdir -p ~/.bin
+        PATH="${HOME}/.bin:${PATH}"
+        curl https://storage.googleapis.com/git-repo-downloads/repo > ~/.bin/repo
+        chmod a+rx ~/.bin/repo
+       
     - name: Fetch toolchains
       run: |
         mkdir toolchains
