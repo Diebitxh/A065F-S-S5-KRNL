@@ -4,15 +4,21 @@ on:
     inputs:
       BRANCH:
         description: Kernel branch
-        default: 'android-6.6-stable'
+        default: 'android-4.19-stable'
         required: true
       TARGET_DEVICE:
         description: 'Device'
         required: true
-        default: 'a06'
+        default: 'a12s'
         type: choice
-      UPLOAD_TO_GT:
-        description: Upload to Github
+        options:
+          - a12s
+          - m12
+      KSU:
+        description: Add KernelSU support
+        type: boolean
+      UPLOAD_TO_TG:
+        description: Upload to Telegram
         type: boolean
       SELINUX_PERMISSIVE:
         description: Permissive SELinux
@@ -20,9 +26,8 @@ on:
         
 jobs:
   build:
-  
     runs-on: ubuntu-latest
-    environment: upload
+    environment: telegramUpload
     steps:
     - uses: actions/checkout@v4
       with:
@@ -73,10 +78,14 @@ jobs:
         export BUILD_START=`date`
         export IS_CI=true
         
-        if [[ "${{ github.event.inputs.TARGET_DEVICE }}" = "a06" ]]; then
-          export DEFCONFIG="defconfig"
+        if [[ "${{ github.event.inputs.TARGET_DEVICE }}" = "a12s" ]]; then
+          export DEFCONFIG="a12s_defconfig"
           export DEVICE="A127F"
           export DEVICE_ID="A12s"
+        elif [[ "${{ github.event.inputs.TARGET_DEVICE }}" = "m12" ]]; then
+          export DEFCONFIG="m12_defconfig"
+          export DEVICE="M127F"
+          export DEVICE_ID="M12"
         fi
         
         #export PLATFORM_VERSION=13
@@ -135,7 +144,7 @@ jobs:
         name: Build-${{ steps.buildKernel.outputs.buildDetails }}
         path: |
           kernel_root/out/arch/arm64/boot/*.gz
-          kernel_root/out/arch/arm64/boot/dts/mediatek/*.dtb
+          kernel_root/out/arch/arm64/boot/dts/exynos/*.dtb
           kernel_root/out/arch/arm64/boot/dts/samsung/*.dtb
 
     - name: Upload AnyKernel3
@@ -151,34 +160,52 @@ jobs:
       run: |
         rm out/vmlinux.o out/vmlinux out/System.map
         
-    - name: "Make defconfig"
-     working-directory: ./${{ env.kernelDir }}/${{ env.kernelName }}
-        env:
-          args: ${{ steps.generate-args.outputs.args }}
-        run: |
-          echo "PATH Variable: $PATH"
-          make ${{ env.args }} ${{ env.DEFCONFIG_NAME }}
+    - name: Upload to Telegram
+      if: github.event.inputs.UPLOAD_TO_TG == 'true'
+      env:
+        CHAT_ID: ${{ secrets.CHAT_ID }}
+        BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+      run: |
+        if [ ! -z "${{ secrets.BOT_TOKEN }}" ]; then
+          ZIP=$(find `pwd` -name "*.zip") && git clone https://github.com/rsuntk/rsuntkBotScript.git --depth=1 i && cp ./i/* . && rm -rf i && bash $(pwd)/rsuntkbot.sh $ZIP "`cat buildDetails.txt`"
+        fi
+      working-directory: kernel_root
+      
+    - name: Check need LKM stripping
+      id: need_strip
+      run: |
+        LKM=$(find $(pwd) -type f -name "*.ko")
+        if [ "$LKM" = "" ]; then
+          echo "UPLOAD=false" >> $GITHUB_OUTPUT
+        else
+          echo "UPLOAD=true" >> $GITHUB_OUTPUT
+        fi
+        
+    - name: Strip LKMs
+      if: steps.need_strip.outputs.UPLOAD == 'true'
+      run: |
+        # Cleanup zip
+        rm -rf *.zip
 
-      - name: "Build kernel"
-        working-directory: ./${{ env.kernelDir }}/${{ env.kernelName }}
-        env:
-          args: ${{ steps.generate-args.outputs.args }}
-        run: |
-          echo "PATH Variable: $PATH"
-          make ${args}
+        # Create folder
+        mkdir ../kernel_object_tmp
+        mkdir kernel_object
 
-      - name: "Upload Image"
-        uses: actions/upload-artifact@v3
-        with:
-          name: Image(${{ env.kernelDevice }}-${{ env.kernelName }}-${{ env.kernelBranch }})
-          path: ./${{ env.kernelDir }}/${{ env.OUT_DIR }}/arch/${{ env.ARCH }}/boot/Image
-          if-no-files-found: ignore
-          retention-days: 7
+        # Only move neccessary path!
+        find $(pwd) -type f -name "*.ko" -exec mv {} ../kernel_object_tmp \;
+        LIST=$(find ../kernel_object_tmp -type f -name "*.ko")
 
-      - name: "Upload Image.gz"
-        uses: actions/upload-artifact@v3
-        with:
-          name: Image.gz(${{ env.kernelDevice }}-${{ env.kernelName }}-${{ env.kernelBranch }})
-          path: ./${{ env.kernelDir }}/${{ env.OUT_DIR }}/arch/${{ env.ARCH }}/boot/Image.gz
-          if-no-files-found: ignore
-          retention-days: 7
+        # Start stripping
+        for file in $LIST; do
+          echo -e "- Stripping `basename $file`"
+          $(pwd)/toolchains/clang/bin/llvm-strip "$file" --strip-unneeded
+        done
+        mv ../kernel_object_tmp/*.ko $(pwd)/kernel_object/
+      working-directory: kernel_root
+        
+    - name: Upload LKM
+      if: steps.need_strip.outputs.UPLOAD == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: LKM-${{ steps.buildKernel.outputs.buildDetails }}
+        path: kernel_root/kernel_object/*
