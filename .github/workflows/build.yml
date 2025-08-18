@@ -82,7 +82,7 @@ jobs:
         export DEVICE_ID="A06"
         
         if [[ "${{ github.event.inputs.SELINUX_PERMISSIVE }}" = "true" ]]; then
-          rm -rf kernel-6.6/security/selinux && cd kernel-6.6/security/ && git clone https://github.com/rsuntk/selinux_perm.git --depth=1 selinux && rm -rf selinux/.git && cd ..
+          rm -rf kernel-6.6/security/selinux && cd kernel-6.6/security/ && git clone https://github.com/rsuntk/selinux_perm.git --depth=1 selinux && rm -rf selinux/.git && cd && cd ..
           echo "CONFIG_SECURITY_SELINUX_ALWAYS_PERMISSIVE=y" >> kernel-6.6/arch/arm64/configs/$DEFCONFIG
           export SELINUX_STATE="Permissive"
         else
