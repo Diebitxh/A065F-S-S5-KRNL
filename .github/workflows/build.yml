@@ -77,13 +77,13 @@ jobs:
         export IS_CI=true
         export LLVM=1
         export LLVM_IAS=1
-        export DEFCONFIG="a06_defconfig"
+        export DEFCONFIG="defconfig"
         export DEVICE="A065F"
         export DEVICE_ID="A06"
         
         if [[ "${{ github.event.inputs.SELINUX_PERMISSIVE }}" = "true" ]]; then
-          rm -rf security/selinux && cd security/ && git clone https://github.com/rsuntk/selinux_perm.git --depth=1 selinux && rm -rf selinux/.git && cd ..
-          echo "CONFIG_SECURITY_SELINUX_ALWAYS_PERMISSIVE=y" >> arch/arm64/configs/$DEFCONFIG
+          rm -rf kernel-6.6/security/selinux && cd kernel-6.6/security/ && git clone https://github.com/rsuntk/selinux_perm.git --depth=1 selinux && rm -rf selinux/.git && cd ..
+          echo "CONFIG_SECURITY_SELINUX_ALWAYS_PERMISSIVE=y" >> kernel-6.6/arch/arm64/configs/$DEFCONFIG
           export SELINUX_STATE="Permissive"
         else
           export SELINUX_STATE="Enforcing"
